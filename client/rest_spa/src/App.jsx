@@ -1,32 +1,97 @@
 import { useState, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
-import "./App.css";
+import "./styles/App.sass";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Modal, Button, Alert, DropdownButton, Dropdown, Form } from 'react-bootstrap'
+import DropdownList from './components/DropdownList'
 
 function App() {
-    const [backendData, setBackendData] = useState([{}]);
+    const [dropdownClicked, setDropdownClicked] = useState(false)
+    const [validated, setValidated] = useState(false);
+    const [retrievedData, setRetrievedData] = useState([{}])
+    const [formData, setFormData] = useState({});
 
-    //!Not fetching
-    useEffect(() => {
-        fetch('/api').then(
-            res =>
-                res.json()
-        ).then(
-            response => setBackendData(response)
-        )
-    }, [])
+    const exerciseOptions = ['Barbell press', 'Barbell squat']
+
+    function handleInputChange(event) {
+        const { name, value } = event.target
+        setFormData({ ...formData, [name]: value })
+        setValidated(false)
+    }
+
+    function submitNewWorkout(event) {
+        event.preventDefault()
+        setValidated(true)
+        if (event.currentTarget.checkValidity() === false) return
+        fetch("http://localhost:5000/new-workout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        })
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((error) => console.error(error));
+        
+    }
 
     return (
         <div>
-            <div className="bordered">
-               {(typeof backendData === 'undefined') ? (
-                <p>Loading...</p>
-                ):
-                (<div>
-                    <h2>Got:</h2>
-                    <p>{backendData}</p>
-                </div>)}
-            </div>
+            <header className="header">
+                <h1>GYM SET COUNTER</h1>
+            </header>
+            <section className="workouts">
+                <ul className="workout-list">
+                    <li
+                        className="workout-item bordered"
+                        onClick={() => {
+                            setDropdownClicked(!dropdownClicked);
+                        }}
+                    >
+                        <h2 className="workout-date">DATE</h2>
+                        <h2 className="workout-title">NAME</h2>
+                        <FontAwesomeIcon
+                            className="icon"
+                            icon="fa-solid fa-angle-down"
+                            size="2xl"
+                            style={{ color: "#E1E5F2" }}
+                        />
+                        {/* {dropdownClicked? () : ()} */}
+                    </li>
+                    <li className="new-workout">
+                        <Form onSubmit={submitNewWorkout} noValidate validated={validated}>
+                            <Form.Group>
+                                <Form.Label>Workout Date</Form.Label>
+                                <Form.Control type="date" name="date" onChange={handleInputChange} required></Form.Control>
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Workout title</Form.Label>
+                                <Form.Control type="text" name="title" onChange={handleInputChange} required></Form.Control>
+                            </Form.Group>
+                            <div>
+                                <Form.Group>
+                                    <Form.Label>Exercise</Form.Label>
+                                    <Form.Select name="exercise" onChange={handleInputChange} required>
+                                        {exerciseOptions.map((ex) => (
+                                            <option value={ex}>{ex}</option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Reps</Form.Label>
+                                    <Form.Control name="reps" type="number" min="0" max="50" onChange={handleInputChange} required></Form.Control>
+                                    <Form.Control.Feedback type="invalid">Must be between 0 and 50</Form.Control.Feedback>
+                                </Form.Group>
+                            </div>
+                            <Button type="submit">
+                                Submit
+                            </Button>
+                        </Form>
+                    </li>
+                </ul>
+            </section>
         </div>
     );
 }

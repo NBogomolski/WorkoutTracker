@@ -1,0 +1,50 @@
+@import "bootstrap/scss/bootstrap"
+
+$h1-size: 50px 
+
+$bold-font-weight:  800
+
+@mixin general-font()
+    font-family: 'Roboto'
+
+body
+    @include general-font()
+
+ul
+    list-style: none
+    padding-left: 0
+    
+
+.header
+    background-color: #FFFFFF
+    display: flex
+    justify-content: center
+    h1
+        margin: auto
+        font-size: $h1-size
+        font-weight: $bold-font-weight
+    
+.bordered
+    border: 3px solid #1F7A8C
+
+.workouts
+    display: flex
+    justify-content: center
+
+.workout-list
+    width: 70%
+    display: flex
+    flex-direction: column
+    
+.workout-item
+    min-height: 30px
+    text-align: center
+    display: flex
+    align-items: center
+    cursor: pointer
+    .icon
+        flex-grow: 1
+    h2
+        color: #E1E5F2
+        flex-grow: 4
+
