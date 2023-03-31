@@ -6,22 +6,35 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Modal, Button, Alert, DropdownButton, Dropdown, Form, Accordion } from 'react-bootstrap'
 import DropdownList from './components/DropdownList'
 import AccordionBody from "react-bootstrap/esm/AccordionBody";
+import axios from 'axios'
 
 function App() {
-    const [dropdownClicked, setDropdownClicked] = useState(false)
+    const [accordionClicked, setAccordionClicked] = useState(false)
     const [validated, setValidated] = useState(false);
-    const [retrievedData, setRetrievedData] = useState([{}])
+    const [retrievedData, setRetrievedData] = useState([])
     const [formData, setFormData] = useState({});
     const [serverDataLoaded, setServerDataLoaded] = useState(false);
 
     const exerciseOptions = ['Barbell press', 'Barbell squat']
 
     useEffect(() => {
-        fetch('localhost:5000')
+        // axios.get("http://localhost:5000/api/workouts")
+        // .then(data => {
+        //     setRetrievedData(data.workouts)
+        //     console.log(retrievedData);
+        // })
+
+        fetch('http://localhost:5000/api/workouts')
         .then(res => res.json())
-        .then(res => res.forEach(item => {
-            setServerDataLoaded([...serverDataLoaded, item])
-        }))
+        .then(data => {
+            setRetrievedData(data.workouts)
+            console.log(retrievedData);
+        })
+        .then(() => setServerDataLoaded(true))
+        .catch(err => {
+            console.error(err)
+            setServerDataLoaded(false)
+        })
     }, [])
 
     function handleInputChange(event) {
@@ -54,23 +67,7 @@ function App() {
             </header>
             <section className="workouts">
                 <ul className="workout-list">
-                    <li
-                        className="workout-item bordered"
-                        onClick={() => {
-                            setDropdownClicked(!dropdownClicked);
-                        }}
-                    >
-                        <h2 className="workout-date">DATE</h2>
-                        <h2 className="workout-title">NAME</h2>
-                        <FontAwesomeIcon
-                            className="icon"
-                            icon="fa-solid fa-angle-down"
-                            size="2xl"
-                            style={{ color: "#E1E5F2" }}
-                        />
-                        {/* {dropdownClicked? () : ()} */}
-                    </li>
-                    <li>
+                    <li key="retrievedItems">
                         <Accordion>
                             <Accordion.Item eventKey="0">
                                 <Accordion.Header>
@@ -78,12 +75,21 @@ function App() {
                                     <h2>Title</h2>
                                 </Accordion.Header>
                                 <Accordion.Body>
-                                    Hello world!
+                                    {serverDataLoaded ? (
+                                        retrievedData.map(item => {
+                                            <li key={item.id}>
+                                                {item.title}
+                                            </li>
+                                        }
+                                        )
+                                    ) : (
+                                        <p>Not loaded</p>
+                                    )}
                                 </Accordion.Body>
                             </Accordion.Item>
                         </Accordion>
                     </li>
-                    <li className="new-workout">
+                    <li className="new-workout" key="addNewItem">
                         <Form
                             onSubmit={submitNewWorkout}
                             noValidate
@@ -115,9 +121,9 @@ function App() {
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        <option>
+                                        {/*                                         <option>
                                             <Form.Control type="text"></Form.Control>
-                                        </option>
+                                        </option> */}
                                         {exerciseOptions.map((ex) => (
                                             <option value={ex}>{ex}</option>
                                         ))}
@@ -138,7 +144,9 @@ function App() {
                                     </Form.Control.Feedback>
                                 </Form.Group>
                             </div>
-                            <Button class="btn-submit" type="submit">Submit</Button>
+                            <Button className="btn-submit" type="submit">
+                                Submit
+                            </Button>
                         </Form>
                     </li>
                 </ul>
