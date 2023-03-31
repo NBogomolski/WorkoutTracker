@@ -12,8 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const ServerPORT = 5000;
 
 const workouts = [
-    { id: 1, title: "hello world" },
-    { id: 2, title: "dva" },
+    
 ];
 
 app.get('/api/workouts', function (req, res, next) {
@@ -21,19 +20,28 @@ app.get('/api/workouts', function (req, res, next) {
     console.log({workouts});
 });
 
-app.post('/new-workout', (req, res, next) => {
+app.post('/api/new-workout', (req, res, next) => {
     console.log(req.headers['content-type']);
-    workouts.push(req.body);
+    workouts.push({...req.body, id: workouts.length});
     // console.log(workouts);
     res.status(200)
 })
 
+app.delete("/api/workouts/delete/:id", (req, res, next) => {
+    try {
+        if (workouts.at(req.params.id)) {
+            workouts.splice(req.params.id, 1)
+            res.sendStatus(200)
+        }
+        res.status(500)
+    } catch (error) {
+        console.error(error);
+        res.status(500);
+    }
+});
 
-// connectToDB.then( () => {
-    app.listen(ServerPORT, () => {
-        console.log("listening on port " + ServerPORT);
-    })
-    // .catch((err) => {
-        // console.error(err);
-    // });
-// })
+
+app.listen(ServerPORT, () => {
+    console.log("listening on port " + ServerPORT);
+})
+

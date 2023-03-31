@@ -1,5 +1,3 @@
-@import "bootstrap/scss/bootstrap"
-
 $h1-size: 50px 
 
 $bold-font-weight:  800
@@ -8,7 +6,8 @@ $bold-font-weight:  800
     font-family: 'Roboto'
 
 body
-    @include general-font()
+    font-family: 'Roboto'
+    
 
 ul
     list-style: none
@@ -35,6 +34,12 @@ ul
     width: 70%
     display: flex
     flex-direction: column
+    .flex-horizontal.justify-content-around
+        display: flex
+        flex-direction: row
+        justify-content: space-around
+
+
     
 .workout-item
     min-height: 30px
@@ -48,3 +53,5 @@ ul
         color: #E1E5F2
         flex-grow: 4
 
+
+@import "bootstrap/scss/bootstrap"

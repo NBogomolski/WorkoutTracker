@@ -3,19 +3,45 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./styles/App.sass";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Modal, Button, Alert, DropdownButton, Dropdown, Form, Accordion } from 'react-bootstrap'
-import DropdownList from './components/DropdownList'
+import {
+    Modal,
+    Button,
+    Alert,
+    DropdownButton,
+    Dropdown,
+    Form,
+    Accordion,
+    Spinner,
+    Row,
+    Col
+} from "react-bootstrap";
+import DropdownList from "./components/DropdownList";
 import AccordionBody from "react-bootstrap/esm/AccordionBody";
-import axios from 'axios'
+import axios from "axios";
 
 function App() {
-    const [accordionClicked, setAccordionClicked] = useState(false)
+    const [accordionClicked, setAccordionClicked] = useState(false);
     const [validated, setValidated] = useState(false);
-    const [retrievedData, setRetrievedData] = useState([])
-    const [formData, setFormData] = useState({});
+    const [retrievedData, setRetrievedData] = useState([]);
+    const [formData, setFormData] = useState({exercise: "Barbell press"});
     const [serverDataLoaded, setServerDataLoaded] = useState(false);
+    const [taskDeleted, setTaskDeleted] = useState(false);
 
-    const exerciseOptions = ['Barbell press', 'Barbell squat']
+    const exerciseOptions = ["Barbell press", "Barbell squat"];
+
+    function fetchWorkouts() {
+        fetch("http://localhost:5000/api/workouts")
+            .then((res) => res.json())
+            .then((data) => {
+                setRetrievedData(data.workouts);
+                console.log(retrievedData);
+            })
+            .then(() => setServerDataLoaded(true))
+            .catch((err) => {
+                console.error(err);
+                setServerDataLoaded(false);
+            });
+    }
 
     useEffect(() => {
         // axios.get("http://localhost:5000/api/workouts")
@@ -23,41 +49,49 @@ function App() {
         //     setRetrievedData(data.workouts)
         //     console.log(retrievedData);
         // })
+        fetchWorkouts();
 
-        fetch('http://localhost:5000/api/workouts')
-        .then(res => res.json())
-        .then(data => {
-            setRetrievedData(data.workouts)
-            console.log(retrievedData);
-        })
-        .then(() => setServerDataLoaded(true))
-        .catch(err => {
-            console.error(err)
-            setServerDataLoaded(false)
-        })
-    }, [])
+    }, []);
+
 
     function handleInputChange(event) {
-        const { name, value } = event.target
-        setFormData({ ...formData, [name]: value })
-        setValidated(false)
+        const { name, value } = event.target;
+        setFormData({ ...formData, [name]: value });
+        setValidated(false);
     }
 
     function submitNewWorkout(event) {
-        event.preventDefault()
-        setValidated(true)
-        if (event.currentTarget.checkValidity() === false) return
-        fetch("http://localhost:5000/new-workout", {
+        event.preventDefault();
+        setValidated(true);
+        if (event.currentTarget.checkValidity() === false) return;
+        fetch("http://localhost:5000/api/new-workout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(formData),
         })
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+            .catch((error) => console.error(error));
+        fetchWorkouts()
+    }
+
+    function handleTaskDeletion(id) {
+        if (isNaN(id)) return
+        fetch('http://localhost:5000/api/workouts/delete/' + id, {
+            method: 'DELETE'
+        })
         .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => console.error(error));
-        
+        .then((data) => {
+            console.log(data)
+            if (data.status == 500) { 
+                setTaskDeleted(true)
+                
+            }                
+
+        })
+        .catch((error) => console.error(error))
     }
 
     return (
@@ -66,27 +100,36 @@ function App() {
                 <h1>GYM SET COUNTER</h1>
             </header>
             <section className="workouts">
+                {/* {retrievedData ? ( */}
+                
+                {/*              ) : (
+                    <p>Not loaded</p>
+                )} */}
                 <ul className="workout-list">
                     <li key="retrievedItems">
-                        <Accordion>
-                            <Accordion.Item eventKey="0">
-                                <Accordion.Header>
-                                    <h2>Date</h2>
-                                    <h2>Title</h2>
-                                </Accordion.Header>
-                                <Accordion.Body>
-                                    {serverDataLoaded ? (
-                                        retrievedData.map(item => {
-                                            <li key={item.id}>
-                                                {item.title}
-                                            </li>
-                                        }
-                                        )
-                                    ) : (
-                                        <p>Not loaded</p>
-                                    )}
-                                </Accordion.Body>
-                            </Accordion.Item>
+                        //!Not working
+                        {taskDeleted ? (<Alert>
+                            Task successfully deleted!
+                        </Alert>) : <span></span>}
+                        <Accordion defaultActiveKey={null}>
+                            {retrievedData ? (retrievedData.map((item) => {
+                                return (
+                                    <Accordion.Item eventKey={item.id}>
+                                        <Accordion.Header className="flex-horizontal justify-content-around">
+                                            <h2>{item.date}</h2>
+                                            <h2>{item.title}</h2>
+                                        </Accordion.Header>
+                                        <Accordion.Body>
+                                            <h2>Exercise</h2>
+                                            <Button variant="danger" onClick={handleTaskDeletion(item.id)}>Delete</Button>
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+                                );})) : (
+                                    <Spinner animation="border" role="status">
+                                        <span>loading...</span>
+                                    </Spinner>
+                                )
+                            }
                         </Accordion>
                     </li>
                     <li className="new-workout" key="addNewItem">
