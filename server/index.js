@@ -3,7 +3,7 @@ const app = express();
 
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const connectToDb = require('./config')
+const DB = require('./config')
 
 app.use(cors({origin: "*"}))
 app.use(bodyParser.json());
@@ -15,9 +15,18 @@ const workouts = [
     
 ];
 
-app.get('/api/workouts', function (req, res, next) {
-    res.json({workouts});
-    console.log({workouts});
+app.get('/api/workouts', async function (req, res, next) {
+
+    let response = await DB.from("workouts").select("*");
+    console.log(response)
+    res.json(response.data)
+/*     DB
+    .from('workouts')
+    .select('title')
+    .then(response => res.json(response)) */
+
+    // DB.query('SELECT * FROM workouts')
+    // .then(data => console.log(data))
 });
 
 app.post('/api/new-workout', (req, res, next) => {
