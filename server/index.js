@@ -11,41 +11,38 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const ServerPORT = 5000;
 
-const workouts = [
-    
-];
 
 app.get('/api/workouts', async function (req, res, next) {
 
     let response = await DB.from("workouts").select("*");
-    console.log(response)
+    console.log(response.data)
     res.json(response.data)
-/*     DB
-    .from('workouts')
-    .select('title')
-    .then(response => res.json(response)) */
 
-    // DB.query('SELECT * FROM workouts')
-    // .then(data => console.log(data))
 });
 
-app.post('/api/new-workout', (req, res, next) => {
+app.post('/api/new-workout', async (req, res, next) => {
     console.log(req.headers['content-type']);
-    workouts.push({...req.body, id: workouts.length});
-    // console.log(workouts);
-    res.status(200)
+    // console.log(req.body)
+    let exists = await DB.from("workouts").select('*').eq('title', req.body.title)
+    console.log(exists)    
+    if (exists.data.length > 0)
+        return res.status(500)
+    let added = await DB.from("workouts").insert(req.body)
+    console.log(added)
+    //TODO: add insertion for db
+    res.status(added.status)
 })
 
-app.delete("/api/workouts/delete/:id", (req, res, next) => {
+app.delete("/api/workouts/delete/:id", async (req, res, next) => {
+    //TODO: add search in db for certain id and try to delete
+    console.log(req.params.id)
     try {
-        if (workouts.at(req.params.id)) {
-            workouts.splice(req.params.id, 1)
-            res.sendStatus(200)
-        }
-        res.status(500)
+        let deleted = await DB.from("workouts").delete().eq('id',req.params.id)
+        if (deleted.error)
+            res.status(404)
+        console.log(deleted)
     } catch (error) {
-        console.error(error);
-        res.status(500);
+        console.error(error)
     }
 });
 

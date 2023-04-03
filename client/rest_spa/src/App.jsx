@@ -24,34 +24,36 @@ function App() {
     const [validated, setValidated] = useState(false);
     const [retrievedData, setRetrievedData] = useState([]);
     const [formData, setFormData] = useState({exercise: "Barbell press"});
-    const [serverDataLoaded, setServerDataLoaded] = useState(false);
     const [taskDeleted, setTaskDeleted] = useState(false);
+    const exerciseOptions = [
+        "Barbell press",
+        "Barbell squat",
+        "Ez barbell curl",
+        "Skull crusher",
+        "Dips",
+        "Pull-ups",
+        "Shoulder press",
+        "Lateral pulldowns",
+        "Lateral raises"
+    ]
 
-    const exerciseOptions = ["Barbell press", "Barbell squat"];
-
-    function fetchWorkouts() {
+    useEffect(() => {
         fetch("http://localhost:5000/api/workouts")
             .then((res) => res.json())
             .then((data) => {
-                setRetrievedData(data.workouts);
-                console.log(retrievedData);
+                setRetrievedData(data);
+                // data.workouts.map(item => {exerciseOptions.push(item.exercise)})
+                console.log(data)
             })
-            .then(() => setServerDataLoaded(true))
             .catch((err) => {
                 console.error(err);
-                setServerDataLoaded(false);
             });
-    }
-
-    useEffect(() => {
-        // axios.get("http://localhost:5000/api/workouts")
-        // .then(data => {
-        //     setRetrievedData(data.workouts)
-        //     console.log(retrievedData);
-        // })
-        fetchWorkouts();
 
     }, []);
+
+    useEffect(() => {
+        setRetrievedData(retrievedData);
+    }, [retrievedData]);
 
 
     function handleInputChange(event) {
@@ -72,9 +74,15 @@ function App() {
             body: JSON.stringify(formData),
         })
             .then((response) => response.json())
-            .then((data) => console.log(data))
+            .then( data => {
+                if (data.status === 201) {
+                    setRetrievedData((data) => data.push(formData))
+                    setValidated(false)
+                }
+                
+            })
             .catch((error) => console.error(error));
-        fetchWorkouts()
+            //!Handle submit on frontend
     }
 
     function handleTaskDeletion(id) {
@@ -85,10 +93,13 @@ function App() {
         .then((response) => response.json())
         .then((data) => {
             console.log(data)
-            if (data.status == 500) { 
+            if (data.status == 204) { 
                 setTaskDeleted(true)
-                
-            }                
+                //Remove task from frontend
+                setRetrievedData(retrievedData.filter(workout => workout.id !== id))
+            } else {
+                setTaskDeleted(false)
+            }
 
         })
         .catch((error) => console.error(error))
@@ -97,7 +108,7 @@ function App() {
     return (
         <div>
             <header className="header">
-                <h1>GYM SET COUNTER</h1>
+                <h1>Workout tracker</h1>
             </header>
             <section className="workouts">
                 {/* {retrievedData ? ( */}
@@ -107,7 +118,7 @@ function App() {
                 )} */}
                 <ul className="workout-list">
                     <li key="retrievedItems">
-                        //!Not working
+                        {/* !Not working */}
                         {taskDeleted ? (<Alert>
                             Task successfully deleted!
                         </Alert>) : <span></span>}
@@ -116,17 +127,17 @@ function App() {
                                 return (
                                     <Accordion.Item eventKey={item.id}>
                                         <Accordion.Header className="flex-horizontal justify-content-around">
-                                            <h2>{item.date}</h2>
+                                            <h2>{new Date(item.date).toLocaleString()}</h2>
                                             <h2>{item.title}</h2>
                                         </Accordion.Header>
                                         <Accordion.Body>
-                                            <h2>Exercise</h2>
+                                            <h2>Exercise:</h2>
+                                            <p>{item.exercise}, {item.reps}</p>
                                             <Button variant="danger" onClick={handleTaskDeletion(item.id)}>Delete</Button>
                                         </Accordion.Body>
                                     </Accordion.Item>
                                 );})) : (
                                     <Spinner animation="border" role="status">
-                                        <span>loading...</span>
                                     </Spinner>
                                 )
                             }
