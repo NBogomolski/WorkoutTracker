@@ -15,15 +15,13 @@ import {
     Row,
     Col
 } from "react-bootstrap";
-import DropdownList from "./components/DropdownList";
-import AccordionBody from "react-bootstrap/esm/AccordionBody";
-import axios from "axios";
+import WorkoutForm from "./components/WorkoutForm";
 
 function App() {
-    const [accordionClicked, setAccordionClicked] = useState(false);
-    const [validated, setValidated] = useState(false);
+    // const [accordionClicked, setAccordionClicked] = useState(false);
+    // const [validated, setValidated] = useState(false);
     const [retrievedData, setRetrievedData] = useState([]);
-    const [formData, setFormData] = useState({exercise: "Barbell press"});
+    // const [formData, setFormData] = useState({exercise: "Barbell press"});
     const [taskDeleted, setTaskDeleted] = useState(false);
     const exerciseOptions = [
         "Barbell press",
@@ -36,7 +34,7 @@ function App() {
         "Lateral pulldowns",
         "Lateral raises"
     ]
-
+ 
     useEffect(() => {
         fetch("http://localhost:5000/api/workouts")
             .then((res) => res.json())
@@ -51,18 +49,17 @@ function App() {
 
     }, []);
 
-    useEffect(() => {
-        setRetrievedData(retrievedData);
-    }, [retrievedData]);
-
-
-    function handleInputChange(event) {
+    function handleChildStateChange(childState) {
+        setRetrievedData(prev => prev.push(childState))
+        
+    }
+/*     function handleInputChange(event) {
         const { name, value } = event.target;
         setFormData({ ...formData, [name]: value });
         setValidated(false);
-    }
+    } */
 
-    function submitNewWorkout(event) {
+/*     function submitNewWorkout(event) {
         event.preventDefault();
         setValidated(true);
         if (event.currentTarget.checkValidity() === false) return;
@@ -83,11 +80,12 @@ function App() {
             })
             .catch((error) => console.error(error));
             //!Handle submit on frontend
-    }
+    } */
 
-    function handleTaskDeletion(id) {
-        if (isNaN(id)) return
-        fetch('http://localhost:5000/api/workouts/delete/' + id, {
+    function handleTaskDeletion(event) {
+        if (isNaN(event.target.id)) return
+        console.log('Delete called (client)')
+        fetch('http://localhost:5000/api/delete/' + event.target.id, {
             method: 'DELETE'
         })
         .then((response) => response.json())
@@ -96,7 +94,7 @@ function App() {
             if (data.status == 204) { 
                 setTaskDeleted(true)
                 //Remove task from frontend
-                setRetrievedData(retrievedData.filter(workout => workout.id !== id))
+                setRetrievedData(retrievedData.filter(workout => workout.id !== event.target.id))
             } else {
                 setTaskDeleted(false)
             }
@@ -133,7 +131,7 @@ function App() {
                                         <Accordion.Body>
                                             <h2>Exercise:</h2>
                                             <p>{item.exercise}, {item.reps}</p>
-                                            <Button variant="danger" onClick={handleTaskDeletion(item.id)}>Delete</Button>
+                                            <Button variant="danger" onClick={handleTaskDeletion} id={item.id}>Delete</Button>
                                         </Accordion.Body>
                                     </Accordion.Item>
                                 );})) : (
@@ -144,10 +142,10 @@ function App() {
                         </Accordion>
                     </li>
                     <li className="new-workout" key="addNewItem">
-                        <Form
+                        {/* <Form
                             onSubmit={submitNewWorkout}
                             noValidate
-                            validated={validated}
+                            validated={validated}   
                         >
                             <Form.Group>
                                 <Form.Label>Workout Date</Form.Label>
@@ -175,9 +173,6 @@ function App() {
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        {/*                                         <option>
-                                            <Form.Control type="text"></Form.Control>
-                                        </option> */}
                                         {exerciseOptions.map((ex) => (
                                             <option value={ex}>{ex}</option>
                                         ))}
@@ -201,7 +196,8 @@ function App() {
                             <Button className="btn-submit" type="submit">
                                 Submit
                             </Button>
-                        </Form>
+                        </Form> */}
+                        <WorkoutForm exerciseOptions={exerciseOptions} onChildStateChange={handleChildStateChange}></WorkoutForm>
                     </li>
                 </ul>
             </section>

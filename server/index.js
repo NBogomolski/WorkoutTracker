@@ -15,7 +15,7 @@ const ServerPORT = 5000;
 app.get('/api/workouts', async function (req, res, next) {
 
     let response = await DB.from("workouts").select("*");
-    console.log(response.data)
+    // console.log(response.data)
     res.json(response.data)
 
 });
@@ -33,16 +33,16 @@ app.post('/api/new-workout', async (req, res, next) => {
     res.status(added.status)
 })
 
-app.delete("/api/workouts/delete/:id", async (req, res, next) => {
+app.delete("/api/delete/:id", async (req, res, next) => {
     //TODO: add search in db for certain id and try to delete
-    console.log(req.params.id)
+    console.log(`Delete called ${req.params.id}`)
     try {
         let deleted = await DB.from("workouts").delete().eq('id',req.params.id)
         if (deleted.error)
             res.status(404)
         console.log(deleted)
     } catch (error) {
-        console.error(error)
+        cons0ole.error(error)
     }
 });
 
