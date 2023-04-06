@@ -49,56 +49,35 @@ function App() {
 
     }, []);
 
-    function handleChildStateChange(childState) {
-        setRetrievedData(prev => prev.push(childState))
-        
-    }
-/*     function handleInputChange(event) {
-        const { name, value } = event.target;
-        setFormData({ ...formData, [name]: value });
-        setValidated(false);
-    } */
+    useEffect(() => {
+        let timeout
+        if (taskDeleted) {
+            timeout = setTimeout(() => {
+                setTaskDeleted(false);
+            }, 4000)
+        }
+        return () => clearTimeout(timeout);
+    }, [taskDeleted])
 
-/*     function submitNewWorkout(event) {
-        event.preventDefault();
-        setValidated(true);
-        if (event.currentTarget.checkValidity() === false) return;
-        fetch("http://localhost:5000/api/new-workout", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-        })
-            .then((response) => response.json())
-            .then( data => {
-                if (data.status === 201) {
-                    setRetrievedData((data) => data.push(formData))
-                    setValidated(false)
-                }
-                
-            })
-            .catch((error) => console.error(error));
-            //!Handle submit on frontend
-    } */
+    function handleChildStateChange(childState) {
+        console.log(retrievedData)
+        setRetrievedData(prev => [...prev, childState])
+    }
 
     function handleTaskDeletion(event) {
         if (isNaN(event.target.id)) return
-        console.log('Delete called (client)')
+        console.log('Delete called (client)'+ event.target.id)
         fetch('http://localhost:5000/api/delete/' + event.target.id, {
             method: 'DELETE'
         })
-        .then((response) => response.json())
+        // .then(response => console.log(response))
         .then((data) => {
             console.log(data)
-            if (data.status == 204) { 
+            if (data.status == 204 || data.status == 200) { 
                 setTaskDeleted(true)
                 //Remove task from frontend
-                setRetrievedData(retrievedData.filter(workout => workout.id !== event.target.id))
-            } else {
-                setTaskDeleted(false)
+                setRetrievedData(data => data.filter(workout => workout.id !== event.target.id))
             }
-
         })
         .catch((error) => console.error(error))
     }
@@ -117,13 +96,13 @@ function App() {
                 <ul className="workout-list">
                     <li key="retrievedItems">
                         {/* !Not working */}
-                        {taskDeleted ? (<Alert>
+                        {taskDeleted && (<Alert variant="danger">
                             Task successfully deleted!
-                        </Alert>) : <span></span>}
+                        </Alert>)}
                         <Accordion defaultActiveKey={null}>
-                            {retrievedData ? (retrievedData.map((item) => {
+                            {retrievedData.map((item) => {
                                 return (
-                                    <Accordion.Item eventKey={item.id}>
+                                    <Accordion.Item eventKey={item.id} key={item.id}>
                                         <Accordion.Header className="flex-horizontal justify-content-around">
                                             <h2>{new Date(item.date).toLocaleString()}</h2>
                                             <h2>{item.title}</h2>
@@ -134,70 +113,15 @@ function App() {
                                             <Button variant="danger" onClick={handleTaskDeletion} id={item.id}>Delete</Button>
                                         </Accordion.Body>
                                     </Accordion.Item>
-                                );})) : (
-                                    <Spinner animation="border" role="status">
-                                    </Spinner>
-                                )
+                                );})
                             }
                         </Accordion>
                     </li>
                     <li className="new-workout" key="addNewItem">
-                        {/* <Form
-                            onSubmit={submitNewWorkout}
-                            noValidate
-                            validated={validated}   
-                        >
-                            <Form.Group>
-                                <Form.Label>Workout Date</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    name="date"
-                                    onChange={handleInputChange}
-                                    required
-                                ></Form.Control>
-                            </Form.Group>
-                            <Form.Group>
-                                <Form.Label>Workout title</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="title"
-                                    onChange={handleInputChange}
-                                    required
-                                ></Form.Control>
-                            </Form.Group>
-                            <div>
-                                <Form.Group>
-                                    <Form.Label>Exercise</Form.Label>
-                                    <Form.Select
-                                        name="exercise"
-                                        onChange={handleInputChange}
-                                        required
-                                    >
-                                        {exerciseOptions.map((ex) => (
-                                            <option value={ex}>{ex}</option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group>
-                                    <Form.Label>Reps</Form.Label>
-                                    <Form.Control
-                                        name="reps"
-                                        type="number"
-                                        min="0"
-                                        max="50"
-                                        onChange={handleInputChange}
-                                        required
-                                    ></Form.Control>
-                                    <Form.Control.Feedback type="invalid">
-                                        Must be between 0 and 50
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                            </div>
-                            <Button className="btn-submit" type="submit">
-                                Submit
-                            </Button>
-                        </Form> */}
-                        <WorkoutForm exerciseOptions={exerciseOptions} onChildStateChange={handleChildStateChange}></WorkoutForm>
+                        <WorkoutForm 
+                            exerciseOptions={exerciseOptions}
+                            onChildStateChange={handleChildStateChange}
+                        />
                     </li>
                 </ul>
             </section>

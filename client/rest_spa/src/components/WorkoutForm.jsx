@@ -20,11 +20,13 @@ export default function WorkoutForm(props) {
         })
             .then((response) => response.json())
             .then((data) => {
+                console.log(data)
                 if (data.status === 201) {
                     // setRetrievedData((data) => data.push(formData));
                     setValidated(false);
                     //!Handle submit on frontend
                     props.onChildStateChange(formData);
+                    console.log('state should be changed by now')
 
                 }
             })
@@ -66,7 +68,7 @@ export default function WorkoutForm(props) {
                     required
                 >
                     {props.exerciseOptions.map((ex) => (
-                        <option value={ex}>{ex}</option>
+                        <option key={ex} value={ex}>{ex}</option>
                     ))}
                 </Form.Select>
             </Form.Group>

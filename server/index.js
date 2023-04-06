@@ -28,21 +28,25 @@ app.post('/api/new-workout', async (req, res, next) => {
     if (exists.data.length > 0)
         return res.status(500)
     let added = await DB.from("workouts").insert(req.body)
-    console.log(added)
+    console.log()
     //TODO: add insertion for db
-    res.status(added.status)
+    res.json(added)
 })
 
 app.delete("/api/delete/:id", async (req, res, next) => {
     //TODO: add search in db for certain id and try to delete
-    console.log(`Delete called ${req.params.id}`)
+    console.log(`Delete called id = ${req.params.id}`)
     try {
-        let deleted = await DB.from("workouts").delete().eq('id',req.params.id)
-        if (deleted.error)
-            res.status(404)
-        console.log(deleted)
+        const exists = await DB.from("workouts")
+            .select("*").eq("id", req.params.id)
+        console.log(exists.data)
+        if(exists.data.length === 0) return res.status(404).json()
+
+        let deleted = await DB.from("workouts")
+            .delete().eq("id", req.params.id)
+        res.json(deleted)
     } catch (error) {
-        cons0ole.error(error)
+        console.error(error)
     }
 });
 
