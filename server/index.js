@@ -24,30 +24,22 @@ app.post('/api/new-workout', async (req, res, next) => {
     console.log(req.headers['content-type']);
     // console.log(req.body)
     let exists = await DB.from("workouts").select('*').eq('title', req.body.title)
-    console.log(exists)    
     if (exists.data.length > 0)
-        return res.status(500)
-    let added = await DB.from("workouts").insert(req.body)
-    console.log()
-    //TODO: add insertion for db
+        return res.sendStatus(500)
+    const rowCount = await (await DB.from('workouts').select('*')).data.length
+    console.log(rowCount)
+    let added = await DB.from("workouts").insert({id: rowCount+1,...req.body})
     res.json(added)
 })
 
 app.delete("/api/delete/:id", async (req, res, next) => {
-    //TODO: add search in db for certain id and try to delete
     console.log(`Delete called id = ${req.params.id}`)
-    try {
-        const exists = await DB.from("workouts")
-            .select("*").eq("id", req.params.id)
-        console.log(exists.data)
-        if(exists.data.length === 0) return res.status(404).json()
+    // const exists = await DB.from("workouts").select("*").eq("id", req.params.id)
+    // console.log(exists.data)
+    // if(exists.data.length === 0) return res.status(404).json()
 
-        let deleted = await DB.from("workouts")
-            .delete().eq("id", req.params.id)
-        res.json(deleted)
-    } catch (error) {
-        console.error(error)
-    }
+    let deleted = await DB.from("workouts").delete().eq("id", req.params.id)
+    res.json(deleted)
 });
 
 

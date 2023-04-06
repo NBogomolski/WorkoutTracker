@@ -18,11 +18,10 @@ import {
 import WorkoutForm from "./components/WorkoutForm";
 
 function App() {
-    // const [accordionClicked, setAccordionClicked] = useState(false);
-    // const [validated, setValidated] = useState(false);
     const [retrievedData, setRetrievedData] = useState([]);
-    // const [formData, setFormData] = useState({exercise: "Barbell press"});
     const [taskDeleted, setTaskDeleted] = useState(false);
+    const [taskSuccessfullyAdded, setTaskSuccessfullyAdded] = useState(false)
+
     const exerciseOptions = [
         "Barbell press",
         "Barbell squat",
@@ -34,6 +33,7 @@ function App() {
         "Lateral pulldowns",
         "Lateral raises"
     ]
+    const delayTime = 3000
  
     useEffect(() => {
         fetch("http://localhost:5000/api/workouts")
@@ -54,14 +54,25 @@ function App() {
         if (taskDeleted) {
             timeout = setTimeout(() => {
                 setTaskDeleted(false);
-            }, 4000)
+            }, delayTime)
         }
         return () => clearTimeout(timeout);
     }, [taskDeleted])
 
+    useEffect(() => {
+        let timeout;
+        if (taskSuccessfullyAdded) {
+            timeout = setTimeout(() => {
+                setTaskSuccessfullyAdded(false);
+            }, delayTime);
+        }
+        return () => clearTimeout(timeout);
+    }, [taskSuccessfullyAdded]);
+
     function handleChildStateChange(childState) {
         console.log(retrievedData)
-        setRetrievedData(prev => [...prev, childState])
+        setRetrievedData(prev => [...prev, {id: prev.length > 0 ? prev.at(-1).id + 1 : 1, ...childState}])
+        setTaskSuccessfullyAdded(true)
     }
 
     function handleTaskDeletion(event) {
@@ -76,7 +87,9 @@ function App() {
             if (data.status == 204 || data.status == 200) { 
                 setTaskDeleted(true)
                 //Remove task from frontend
-                setRetrievedData(data => data.filter(workout => workout.id !== event.target.id))
+                // console.log(event)
+                // console.log(retrievedData.filter(wkout => wkout.id !== event.target.id))
+                setRetrievedData(data => data.filter(workout => workout.id != event.target.id))
             }
         })
         .catch((error) => console.error(error))
@@ -88,37 +101,61 @@ function App() {
                 <h1>Workout tracker</h1>
             </header>
             <section className="workouts">
-                {/* {retrievedData ? ( */}
-                
-                {/*              ) : (
-                    <p>Not loaded</p>
-                )} */}
                 <ul className="workout-list">
                     <li key="retrievedItems">
                         {/* !Not working */}
-                        {taskDeleted && (<Alert variant="danger">
-                            Task successfully deleted!
-                        </Alert>)}
+                        {taskDeleted && (
+                            <Alert variant="danger">
+                                Task successfully deleted!
+                            </Alert>
+                        )}
+                        {taskSuccessfullyAdded && (
+                            <Alert variant="success">
+                                Task successfully added!
+                            </Alert>
+                        )}
                         <Accordion defaultActiveKey={null}>
                             {retrievedData.map((item) => {
                                 return (
-                                    <Accordion.Item eventKey={item.id} key={item.id}>
-                                        <Accordion.Header className="flex-horizontal justify-content-around">
-                                            <h2>{new Date(item.date).toLocaleString()}</h2>
+                                    <Accordion.Item
+                                        eventKey={item.id}
+                                        key={item.id}
+                                    >
+                                        <Accordion.Header
+                                            className="flex-horizontal justify-content-around"
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-around",
+                                            }}
+                                        >
+                                            <h2>
+                                                {new Date(
+                                                    item.date
+                                                ).toLocaleDateString()}
+                                            </h2>
                                             <h2>{item.title}</h2>
                                         </Accordion.Header>
                                         <Accordion.Body>
                                             <h2>Exercise:</h2>
-                                            <p>{item.exercise}, {item.reps}</p>
-                                            <Button variant="danger" onClick={handleTaskDeletion} id={item.id}>Delete</Button>
+                                            <p>
+                                                {item.exercise}, {item.reps}
+                                            </p>
+                                            <Button
+                                                variant="danger"
+                                                onClick={handleTaskDeletion}
+                                                id={item.id}
+                                            >
+                                                Delete
+                                            </Button>
                                         </Accordion.Body>
                                     </Accordion.Item>
-                                );})
-                            }
+                                );
+                            })}
                         </Accordion>
                     </li>
                     <li className="new-workout" key="addNewItem">
-                        <WorkoutForm 
+                        <h1>Log a new workout:</h1>
+                        <WorkoutForm
                             exerciseOptions={exerciseOptions}
                             onChildStateChange={handleChildStateChange}
                         />
