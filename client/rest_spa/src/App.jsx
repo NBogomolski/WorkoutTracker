@@ -7,13 +7,9 @@ import {
     Modal,
     Button,
     Alert,
-    DropdownButton,
-    Dropdown,
     Form,
     Accordion,
-    Spinner,
-    Row,
-    Col
+    Stack
 } from "react-bootstrap";
 import WorkoutForm from "./components/WorkoutForm";
 
@@ -128,12 +124,14 @@ function App() {
                                                 justifyContent: "space-around",
                                             }}
                                         >
-                                            <h2>
-                                                {new Date(
-                                                    item.date
-                                                ).toLocaleDateString()}
-                                            </h2>
-                                            <h2>{item.title}</h2>
+                                            <Stack direction="horizontal" gap={5}>
+                                                <h2>
+                                                    {new Date(
+                                                        item.date
+                                                    ).toLocaleDateString()}
+                                                </h2>
+                                                <h2>{item.title}</h2>
+                                            </Stack>
                                         </Accordion.Header>
                                         <Accordion.Body>
                                             <h2>Exercise:</h2>
