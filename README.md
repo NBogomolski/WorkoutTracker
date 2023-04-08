@@ -1,2 +1,6 @@
-# Rep-Counter
-MERN + axios stack app for counting gym sets and reps
+# Workout tracker
+## Client - server app using: 
+- React(SPA)
+- Bootstrap-React
+- Express(REST API)
+- PostgreSQL
