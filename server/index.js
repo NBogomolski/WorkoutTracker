@@ -4,10 +4,12 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const DB = require('./config')
+const authRouter = require('./routes/auth')
 
 app.use(cors({origin: "*"}))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/auth', authRouter)
 
 const ServerPORT = 5000;
 
