@@ -17,48 +17,51 @@ router.post('/register', async (req, res, next) => {
     // return res.status(400).json({ error: "User already exists" });
     bcrypt.hash(password, saltRounds, async (err, hash) => {
        if (err) {
-        console.error(err)
-        res.sendStatus(500)
+            console.error(err)
+            res.sendStatus(500)
        }
-       const { written, error: insertError } = await DB.from('users').insert({ username, password: hash })
+       const {error: insertError } = await DB.from('users')
+                                                        .insert({ username, password: hash })
        if (insertError) {
-        console.error(insertError)
-        return res.sendStatus(500)
+            console.error(insertError)
+            return res.sendStatus(500)
        }
-       console.log(written)
-       res.status(201).json(written)
+    //    console.log(written)
+       res.status(201).json({message: 'Successfully registered'})
     })
     // res.json({body: hashedPassword})
 })
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
     // Verify user credentials and generate JWT token
     const {username, password} = req.body
-    // const username = req.body.username;
-    // const password = req.body.password;
-    bcrypt.hash(password, saltRounds, async (err, hash) => {
-        if (err) return res.sendStatus(500)
-        bcrypt.compare(password, hash, function (err, result) {
-            if (err) {
-                console.error(err);
-            } else if (result) {
-                console.log("Passwords match!");
-            } else {
-                console.log("Passwords do not match!");
+    console.log('login:', req.body)
+    const {data: userData, error: dbError} = await DB.from('users').select('*').eq('username', username)
+    if (dbError) {
+        console.error(dbError)
+        res.sendStatus(500)
+    }
+    console.log('userData:', userData)
+    if (userData.length > 0) {
+        // console.log(userData[0], password)
+        bcrypt.compare(password, userData[0].password, (comparisonErr, match) => {
+            if (comparisonErr) console.error(comparisonErr)
+            else {
+                if (match) return res.sendStatus(200)
+                res.status(400).json({ message: "Passwords don't match" });
             }
         });
-
-    })
+    }
+    else
+        res.sendStatus(404)
     // if (username !== "user" || password !== "password") {
     //     return res.status(401).send("Invalid credentials").json();
     // }
-
-    const token = jwt.sign({ username }, secretKey);
+    // let secretKey = Process.env.SECRET_KEY
+    // const token = jwt.sign({ username }, secretKey);
 
     // Set HttpOnly cookie with token
-    res.cookie("token", token, { httpOnly: true });
-
-    res.send("Logged in successfully");
+    // res.cookie("token", token, { httpOnly: true });
 })
 
 module.exports = router
