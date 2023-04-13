@@ -12,11 +12,13 @@ import {
     Stack
 } from "react-bootstrap";
 import WorkoutForm from "./components/WorkoutForm";
+import LogInForm from "./components/LogInForm";
 
 function App() {
     const [retrievedData, setRetrievedData] = useState([]);
     const [taskDeleted, setTaskDeleted] = useState(false);
     const [taskSuccessfullyAdded, setTaskSuccessfullyAdded] = useState(false)
+    const [userLoggedIn, setUserLoggedIn] = useState(false)
 
     const exerciseOptions = [
         "Barbell press",
@@ -96,6 +98,11 @@ function App() {
             <header className="header">
                 <h1>Workout tracker</h1>
             </header>
+            <section>
+                <LogInForm
+                    // loggedIn={userLoggedIn}
+                />
+            </section>
             <section className="workouts">
                 <ul className="workout-list">
                     <li key="retrievedItems">

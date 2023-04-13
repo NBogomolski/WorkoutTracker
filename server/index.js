@@ -1,14 +1,21 @@
 const express = require('express');
 const app = express();
 
+const cookieParser = require("cookie-parser");
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const DB = require('./config')
 const authRouter = require('./routes/auth')
 
-app.use(cors({origin: "*"}))
+app.use(
+    cors({
+        origin: "http://127.0.0.1:3000",
+        credentials: true,
+    })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use('/auth', authRouter)
 
 const ServerPORT = 5000;
