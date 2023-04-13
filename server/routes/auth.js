@@ -3,6 +3,7 @@ const DB = require("../config");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require('bcrypt')
+require("dotenv").config({path: __dirname+'/./../.env'});
 
 const saltRounds = 10
 
@@ -30,6 +31,8 @@ router.post('/register', async (req, res, next) => {
        res.status(201).json({message: 'Successfully registered'})
     })
     // res.json({body: hashedPassword})
+    
+
 })
 
 router.post("/login", async (req, res) => {
@@ -47,21 +50,26 @@ router.post("/login", async (req, res) => {
         bcrypt.compare(password, userData[0].password, (comparisonErr, match) => {
             if (comparisonErr) console.error(comparisonErr)
             else {
-                if (match) return res.sendStatus(200)
-                res.status(400).json({ message: "Passwords don't match" });
+                if (match) res.status(200)
+                else
+                    res.status(400).json({ message: "Passwords don't match" });
             }
         });
     }
     else
         res.sendStatus(404)
-    // if (username !== "user" || password !== "password") {
-    //     return res.status(401).send("Invalid credentials").json();
-    // }
-    // let secretKey = Process.env.SECRET_KEY
-    // const token = jwt.sign({ username }, secretKey);
 
-    // Set HttpOnly cookie with token
-    // res.cookie("token", token, { httpOnly: true });
+    //TODO: SEND COOKIE WITH JWT TOKEN
+
+    if (res.statusCode === 200) {
+        let secretKey = Process.env.JWT_SECRET_KEY
+        const token = jwt.sign({ username }, secretKey);
+        
+        res.cookie("token", token, { httpOnly: true });
+
+    }
+
+    
 })
 
 module.exports = router
