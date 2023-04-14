@@ -3,9 +3,7 @@ import axios from 'axios'
 import {Form, Button} from 'react-bootstrap';
 
 export default function LogInForm(props) {
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    
+
     function onSubmitUserData(event) {
         event.preventDefault();
 /*         fetch("http://localhost:5000/auth/login", {
@@ -42,13 +40,12 @@ export default function LogInForm(props) {
     }
 
     return (
-        <Form onSubmit={onSubmitUserData} /* className='workout-list' */>
+        <Form onSubmit={onSubmitUserData} className='workout-list'>
             <Form.Group>
                 <Form.Label>Username</Form.Label>
                 <Form.Control
                     type="text"
                     name="username"
-                    onChange={setUsername}
                     required
                 ></Form.Control>
             </Form.Group>
@@ -57,13 +54,14 @@ export default function LogInForm(props) {
                 <Form.Control
                     type="password"
                     name="password"
-                    onChange={setPassword}
                     required
                 ></Form.Control>
             </Form.Group>
-            <Button className="btn-submit" type="submit">
-                Submit
-            </Button>
+            <Form.Group>
+                <Button className="btn-submit" type="submit">
+                    Submit
+                </Button>
+            </Form.Group>
         </Form>
     );
 }

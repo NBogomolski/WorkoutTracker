@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import WorkoutForm from "./components/WorkoutForm";
 import LogInForm from "./components/LogInForm";
+import RegistrationForm from "./components/RegistrationForm";
 
 function App() {
     const [retrievedData, setRetrievedData] = useState([]);
@@ -98,9 +99,12 @@ function App() {
             <header className="header">
                 <h1>Workout tracker</h1>
             </header>
-            <section>
+            <section className="workouts">
+                <RegistrationForm/>
+            </section>
+            <section className="workouts">
                 <LogInForm
-                    // loggedIn={userLoggedIn}
+                // loggedIn={userLoggedIn}
                 />
             </section>
             <section className="workouts">
@@ -131,7 +135,10 @@ function App() {
                                                 justifyContent: "space-around",
                                             }}
                                         >
-                                            <Stack direction="horizontal" gap={5}>
+                                            <Stack
+                                                direction="horizontal"
+                                                gap={5}
+                                            >
                                                 <h2>
                                                     {new Date(
                                                         item.date

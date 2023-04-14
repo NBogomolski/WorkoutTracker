@@ -10,14 +10,17 @@ const saltRounds = 10
 
 router.post('/register', async (req, res, next) => {
     const {username, password} = req.body
+
+    console.log(username, password)
+
     const exists = await (await DB.from('users').select('*').eq('username', username))
     console.log(exists)
     if (exists.error) {
         console.error(exists.error)
         return res.sendStatus(500);
     }
-    // return res.status(400).json({ error: "User already exists" });
-    bcrypt.hash(password, saltRounds, async (err, hash) => {
+    if (exists.data.length > 0) return res.status(400).json({ error: "User already exists" });
+/*     bcrypt.hash(password, saltRounds, async (err, hash) => {
        if (err) {
             console.error(err)
             res.sendStatus(500)
@@ -28,9 +31,8 @@ router.post('/register', async (req, res, next) => {
             console.error(insertError)
             return res.sendStatus(500)
        }
-    //    console.log(written)
        res.status(201).json({message: 'Successfully registered'})
-    })
+    }) */
     // res.json({body: hashedPassword})
     
 
