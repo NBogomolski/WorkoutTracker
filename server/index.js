@@ -9,7 +9,7 @@ const authRouter = require('./routes/auth')
 
 app.use(
     cors({
-        origin: "http://127.0.0.1:3000",
+        origin: "http://localhost:3000",
         credentials: true,
     })
 );
@@ -22,15 +22,19 @@ const ServerPORT = 5000;
 
 
 app.get('/api/workouts', async function (req, res, next) {
-
-    let response = await DB.from("workouts").select("*");
-    // console.log(response.data)
-    res.json(response.data)
+    const userId = req.query.id
+    console.log('userId', userId)
+    let response = await DB.from("workouts").select("*").eq('userId', userId);
+    console.log(response.data)
+    if (response.data)
+        res.json(response.data)
+    else res.json([])
 
 });
 
 app.post('/api/new-workout', async (req, res, next) => {
     console.log(req.headers['content-type']);
+    console.log(req.body)
     // console.log(req.body)
     let exists = await DB.from("workouts").select('*').eq('title', req.body.title)
     if (exists.data.length > 0)
@@ -46,7 +50,7 @@ app.delete("/api/delete/:id", async (req, res, next) => {
     // const exists = await DB.from("workouts").select("*").eq("id", req.params.id)
     // console.log(exists.data)
     // if(exists.data.length === 0) return res.status(404).json()
-
+    
     let deleted = await DB.from("workouts").delete().eq("id", req.params.id)
     res.json(deleted)
 });

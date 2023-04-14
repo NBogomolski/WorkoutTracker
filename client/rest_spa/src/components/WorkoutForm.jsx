@@ -29,7 +29,7 @@ export default function WorkoutForm(props) {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify({...formData, userId: props.userId}),
         })
             .then((data) => {
                 console.log(data);
@@ -105,9 +105,12 @@ export default function WorkoutForm(props) {
                     </Form.Control.Feedback>
                 </Form.Group>
             </div>
-            <Button className="btn-submit" type="submit">
-                Submit
-            </Button>
+            <Form.Group style={{marginTop: 20}}>
+                <Button className="btn-submit" type="submit">
+                    Submit
+                </Button>
+                <Button variant="warning" style={{marginLeft: 70}} onClick={() => props.logOut()}>Log out</Button>
+            </Form.Group>
         </Form>
     );
 }

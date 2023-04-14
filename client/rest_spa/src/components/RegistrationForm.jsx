@@ -5,8 +5,19 @@ import { Form, Button, Alert } from "react-bootstrap";
 export default function RegistrationForm() {
     const [validated, setValidated] = useState(false)
     const confirmRef = useRef(null)
-    const passwordRef = useRef(null)
+    // const passwordRef = useRef(null)
     const [passesMatch, setPassesMatch] = useState(false)
+    const [successfullyRegistered, setTaskSuccessfullyRegistered] = useState(false)
+
+    useEffect(() => {
+        let timeout;
+        if (successfullyRegistered) {
+            timeout = setTimeout(() => {
+                setTaskSuccessfullyRegistered(false);
+            }, 3000);
+        }
+        return () => clearTimeout(timeout);
+    }, [successfullyRegistered]);
 
     function onSubmit(event) {
         event.preventDefault();
@@ -21,7 +32,15 @@ export default function RegistrationForm() {
                     username: event.target.username.value,
                     password: event.target.password.value,
                 }),
-            }).then(res => console.log(res))
+            }).then(res => {
+                console.log(res)
+                if (res.status === 201) {
+                    setTaskSuccessfullyRegistered(true)
+                    event.target.username.value = ''
+                    event.target.password.value = ''
+                    event.target.confirmPassword.value = ''
+                }
+            })
         } else {
             setPassesMatch(false)
             console.log('invalid')
@@ -47,6 +66,12 @@ export default function RegistrationForm() {
             validated={validated}
             className="workout-list"
         >
+            {successfullyRegistered && (
+                <Alert variant="success">
+                    User Successfully regitered
+                </Alert>
+            )}
+            <h1>Register: </h1>
             <Form.Group>
                 <Form.Label>Username</Form.Label>
                 <Form.Control
@@ -86,9 +111,9 @@ export default function RegistrationForm() {
                     </Alert>
                 )}
             </Form.Group>
-            <Form.Group>
+            <Form.Group style={{marginTop: 20}}>
                 <Button className="btn-submit" type="submit">
-                    Submit
+                    Sign up
                 </Button>
             </Form.Group>
         </Form>

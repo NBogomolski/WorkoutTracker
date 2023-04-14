@@ -19,7 +19,8 @@ function App() {
     const [retrievedData, setRetrievedData] = useState([]);
     const [taskDeleted, setTaskDeleted] = useState(false);
     const [taskSuccessfullyAdded, setTaskSuccessfullyAdded] = useState(false)
-    const [userLoggedIn, setUserLoggedIn] = useState(false)
+    const [jwt, setJwt] = useState('')
+    const [userId, setUserId] = useState(null)
 
     const exerciseOptions = [
         "Barbell press",
@@ -35,7 +36,7 @@ function App() {
     const delayTime = 3000
  
     useEffect(() => {
-        fetch("http://localhost:5000/api/workouts")
+        fetch("http://localhost:5000/api/workouts?id="+userId)
             .then((res) => res.json())
             .then((data) => {
                 setRetrievedData(data);
@@ -46,7 +47,7 @@ function App() {
                 console.error(err);
             });
 
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         let timeout
@@ -94,20 +95,19 @@ function App() {
         .catch((error) => console.error(error))
     }
 
+    function handleUserLogIn(jwt) {
+        console.log(jwt)
+        setJwt(jwt.token)
+        setUserId(jwt.userId)
+    }
+
     return (
         <div>
             <header className="header">
                 <h1>Workout tracker</h1>
             </header>
-            <section className="workouts">
-                <RegistrationForm/>
-            </section>
-            <section className="workouts">
-                <LogInForm
-                // loggedIn={userLoggedIn}
-                />
-            </section>
-            <section className="workouts">
+            {jwt ? 
+            (<section className="workouts">
                 <ul className="workout-list">
                     <li key="retrievedItems">
                         {/* !Not working */}
@@ -170,10 +170,27 @@ function App() {
                         <WorkoutForm
                             exerciseOptions={exerciseOptions}
                             onChildStateChange={handleChildStateChange}
+                            logOut={() => handleUserLogIn({token: ''})}
+                            userId={userId}
                         />
                     </li>
                 </ul>
             </section>
+            ) : (
+                <>
+                    <section className="workouts">
+                        <RegistrationForm/>
+                    </section>
+                    <section className="workouts">
+                        <LogInForm
+                        // loggedIn={userLoggedIn}
+                            onUserLogIn={handleUserLogIn}
+                        />
+                    </section>
+                </>
+            )
+            }
+
         </div>
     );
 }
