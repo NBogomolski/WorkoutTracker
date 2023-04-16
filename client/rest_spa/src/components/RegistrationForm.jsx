@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import { Form, Button, Alert } from "react-bootstrap";
 
 export default function RegistrationForm() {
     const [validated, setValidated] = useState(false)
     const confirmRef = useRef(null)
-    // const passwordRef = useRef(null)
     const [passesMatch, setPassesMatch] = useState(false)
     const [successfullyRegistered, setTaskSuccessfullyRegistered] = useState(false)
 
@@ -46,17 +44,6 @@ export default function RegistrationForm() {
             console.log('invalid')
             setValidated(true);
         }
-    //     if (!isValid) {
-    //         // set the isInvalid state of the input control
-    //         confirmRef.current.isValid = false;
-    //         confirmRef.current.isInvalid = true;
-    //     } else {
-    //         // reset the isInvalid state of the input control
-    //         confirmRef.current.isValid = true;
-    //         confirmRef.current.isInvalid = false;
-
-    //         // submit form logic here
-    //     }
     }
 
     return (
@@ -68,7 +55,7 @@ export default function RegistrationForm() {
         >
             {successfullyRegistered && (
                 <Alert variant="success">
-                    User Successfully regitered
+                    User Successfully registered
                 </Alert>
             )}
             <h1>Register: </h1>
@@ -102,9 +89,6 @@ export default function RegistrationForm() {
                     onChange={(e) => setValidated(false)}
                     ref={confirmRef}
                 ></Form.Control>
-                {/* <Form.Control.Feedback type="invalid">
-                    Confirm the password
-                </Form.Control.Feedback> */}
                 {validated && !passesMatch && (
                     <Alert variant="danger">
                         Passwords do not match.

@@ -1,5 +1,4 @@
 import {useState, useEffect} from 'react';
-import axios from 'axios'
 import {Form, Button, Alert} from 'react-bootstrap';
 
 export default function LogInForm(props) {
@@ -17,21 +16,6 @@ export default function LogInForm(props) {
 
     function onSubmitUserData(event) {
         event.preventDefault();
-/*         fetch("http://localhost:5000/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                'Acess-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            body: JSON.stringify({
-                username: event.target.username.value,
-                password: event.target.password.value,
-            }),
-            // credentials: 'include'
-        })
-            .then((data) => data.json())
-            .then((res) => console.log(res)); */
         fetch("http://localhost:5000/auth/login", {
             method: "POST",
             headers: {
@@ -44,12 +28,12 @@ export default function LogInForm(props) {
         }).then(res => res.json())
         .then((res) => {
             console.log(res);
-            if (res.token && res.userId)
+            if (res.token && res.userId){
                 props.onUserLogIn(res);
+            }
             else 
                 setWrongPassword(true);
         });
-        //!
     }
 
     return (
