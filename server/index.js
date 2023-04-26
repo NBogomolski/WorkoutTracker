@@ -34,7 +34,7 @@ app.get('/api/workouts', async function (req, res, next) {
 
 app.post('/api/new-workout', async (req, res, next) => {
     console.log('Submit called, userId = ' + req.body.userId);
-    console.log(req.body)
+    console.log('Request: ',req.body)
     // console.log(req.body)
     let exists = await DB.from("workouts").select('*').eq('title', req.body.title)
     if (exists.data.length > 0)
@@ -45,7 +45,7 @@ app.post('/api/new-workout', async (req, res, next) => {
         .limit(1);
     console.log(lastRow.data[0])
     let added
-    if (lastRow.length > 0) {
+    if (lastRow.data.length > 0) {
         added = await DB.from("workouts").insert({
             id: lastRow.data[0].id + 1,
             ...req.body,

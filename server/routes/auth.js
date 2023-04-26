@@ -39,7 +39,7 @@ router.post('/register', async (req, res, next) => {
 })
 
 router.post("/login", async (req, res) => {
-    console.log("token cookie:", req.headers["set-cookie"], req.cookies.token);
+    console.log("token cookie:", req.cookies.token);
     // Verify user credentials and generate JWT token
     const {username, password} = req.body
     console.log('login:', req.body)
