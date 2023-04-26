@@ -33,15 +33,30 @@ app.get('/api/workouts', async function (req, res, next) {
 });
 
 app.post('/api/new-workout', async (req, res, next) => {
-    console.log(req.headers['content-type']);
+    console.log('Submit called, userId = ' + req.body.userId);
     console.log(req.body)
     // console.log(req.body)
     let exists = await DB.from("workouts").select('*').eq('title', req.body.title)
     if (exists.data.length > 0)
         return res.sendStatus(500)
-    const rowCount = await (await DB.from('workouts').select('*')).data.length
-    console.log(rowCount)
-    let added = await DB.from("workouts").insert({id: rowCount+1,...req.body})
+    const lastRow = await DB.from("workouts")
+        .select('*')
+        .order("id", { ascending: false })
+        .limit(1);
+    console.log(lastRow.data[0])
+    let added
+    if (lastRow.length > 0) {
+        added = await DB.from("workouts").insert({
+            id: lastRow.data[0].id + 1,
+            ...req.body,
+        });
+    } else {
+        added = await DB.from("workouts").insert({
+            id: 1,
+            ...req.body,
+        });
+    }
+    // let added = await DB.from("workouts").insert({id: rowCount+1,...req.body})
     res.json(added)
 })
 
@@ -50,7 +65,7 @@ app.delete("/api/delete/:id", async (req, res, next) => {
     // const exists = await DB.from("workouts").select("*").eq("id", req.params.id)
     // console.log(exists.data)
     // if(exists.data.length === 0) return res.status(404).json()
-    
+
     let deleted = await DB.from("workouts").delete().eq("id", req.params.id)
     res.json(deleted)
 });

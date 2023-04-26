@@ -64,6 +64,7 @@ router.post("/login", async (req, res) => {
                     });
                     res.header("Access-Control-Allow-Credentials", "true")
                     res.status(200).json({token: token, userId: userData[0].id})
+                    // res.cookie('token', token, {httpOnly: true, sameSite: 'none'})
                 }    
                 else
                     return res.status(400).json({ message: "Passwords don't match" });
