@@ -6,10 +6,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const DB = require('./config')
 const authRouter = require('./routes/auth')
+const verifyJWT = require('./routes/verify')
 
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin: "*",
         credentials: true,
     })
 );
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/auth', authRouter)
+app.use(verifyJWT);
 
 const ServerPORT = 5000;
 
@@ -35,7 +37,7 @@ app.get('/api/workouts', async function (req, res, next) {
 app.post('/api/new-workout', async (req, res, next) => {
     console.log('Submit called, userId = ' + req.body.userId);
     console.log('Request: ',req.body)
-    // console.log(req.body)
+    if (!req.body.userId) return res.sendStatus(401);
     let exists = await DB.from("workouts").select('*').eq('title', req.body.title)
     if (exists.data.length > 0)
         return res.sendStatus(500)
@@ -56,16 +58,11 @@ app.post('/api/new-workout', async (req, res, next) => {
             ...req.body,
         });
     }
-    // let added = await DB.from("workouts").insert({id: rowCount+1,...req.body})
     res.json(added)
 })
 
 app.delete("/api/delete/:id", async (req, res, next) => {
     console.log(`Delete called id = ${req.params.id}`)
-    // const exists = await DB.from("workouts").select("*").eq("id", req.params.id)
-    // console.log(exists.data)
-    // if(exists.data.length === 0) return res.status(404).json()
-
     let deleted = await DB.from("workouts").delete().eq("id", req.params.id)
     res.json(deleted)
 });
