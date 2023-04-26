@@ -36,12 +36,27 @@ function App() {
     const delayTime = 3000
  
     useEffect(() => {
-        fetch("http://localhost:5000/api/workouts?id="+userId)
-            .then((res) => res.json())
+        const storedToken = localStorage.getItem('token')
+        if (storedToken)
+            handleUserLogIn({token: storedToken})
+    }, [])
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/workouts?id=" + userId, {
+            headers: {
+                'Authorization': localStorage.getItem("token"),
+            },
+        })
+            .then((res) => {
+                if (res.status === 401) {
+                    handleUserLogIn({ token: "" });
+                }
+                return res.json()
+            })
             .then((data) => {
-                setRetrievedData(data);
-                // data.workouts.map(item => {exerciseOptions.push(item.exercise)})
-                console.log(data)
+                if (Array.isArray(data))
+                    setRetrievedData(data);
+                console.log(data);
             })
             .catch((err) => {
                 console.error(err);
@@ -69,7 +84,7 @@ function App() {
         return () => clearTimeout(timeout);
     }, [taskSuccessfullyAdded]);
 
-    function handleChildStateChange(childState) {
+    function onNewWorkout(childState) {
         console.log(retrievedData)
         setRetrievedData(prev => [...prev, {id: prev.length > 0 ? prev.at(-1).id + 1 : 1, ...childState}])
         setTaskSuccessfullyAdded(true)
@@ -79,17 +94,20 @@ function App() {
         if (isNaN(event.target.id)) return
         console.log('Delete called (client)'+ event.target.id)
         fetch('http://localhost:5000/api/delete/' + event.target.id, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': localStorage.getItem("token"),
+            },
         })
         // .then(response => console.log(response))
         .then((data) => {
             console.log(data)
             if (data.status == 204 || data.status == 200) { 
                 setTaskDeleted(true)
-                //Remove task from frontend
-                // console.log(event)
-                // console.log(retrievedData.filter(wkout => wkout.id !== event.target.id))
                 setRetrievedData(data => data.filter(workout => workout.id != event.target.id))
+            }
+            if (data.status === 401) {
+                handleUserLogIn({ token: "" });
             }
         })
         .catch((error) => console.error(error))
@@ -98,6 +116,7 @@ function App() {
     function handleUserLogIn(jwt) {
         console.log(jwt)
         setJwt(jwt.token)
+        localStorage.setItem('token', jwt.token)
         setUserId(jwt.userId)
     }
 
@@ -110,7 +129,6 @@ function App() {
             (<section className="workouts">
                 <ul className="workout-list">
                     <li key="retrievedItems">
-                        {/* !Not working */}
                         {taskDeleted && (
                             <Alert variant="danger">
                                 Task successfully deleted!
@@ -169,7 +187,7 @@ function App() {
                         <h1>Log a new workout:</h1>
                         <WorkoutForm
                             exerciseOptions={exerciseOptions}
-                            onChildStateChange={handleChildStateChange}
+                            onChildStateChange={onNewWorkout}
                             logOut={() => handleUserLogIn({token: ''})}
                             userId={userId}
                         />
@@ -183,7 +201,6 @@ function App() {
                     </section>
                     <section className="workouts">
                         <LogInForm
-                        // loggedIn={userLoggedIn}
                             onUserLogIn={handleUserLogIn}
                         />
                     </section>

@@ -28,17 +28,19 @@ export default function WorkoutForm(props) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                'Authorization': localStorage.getItem("token"),
             },
-            body: JSON.stringify({...formData, userId: props.userId}),
+            body: JSON.stringify({ ...formData, userId: props.userId }),
         })
             .then((data) => {
                 console.log(data);
                 if (data.status === 201 || data.status === 200) {
-                    // setRetrievedData((data) => data.push(formData));
                     setValidated(false);
                     props.onChildStateChange(formData);
                 } else if (data.status === 500) {
                     setWorkoutExists(true);
+                } else if (data.status === 401) {
+                    props.logOut()
                 }
             })
             .catch((error) => console.error(error));
